@@ -347,3 +347,17 @@ body {
 }
 
 .btn-dashboard:active { transform: translateY(0); }
+
+.credit {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.3px;
+}
+.credit a {
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.credit a:hover { color: var(--purple-light); }

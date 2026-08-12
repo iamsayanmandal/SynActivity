@@ -488,7 +488,7 @@ async function openSettings() {
 
   // Clear all data
   document.getElementById('btn-clear').onclick = async () => {
-    if (!confirm('⚠️ This will permanently delete ALL tracked data.\n\nAre you sure?')) return;
+    if (!confirm('This will permanently delete ALL tracked data and cannot be undone.\n\nAre you sure?')) return;
     await msg('CLEAR_ALL_DATA');
     alert('All data cleared.');
     await loadView('today');
@@ -498,13 +498,13 @@ async function openSettings() {
   document.getElementById('btn-add-cat').onclick = async () => {
     const domain = document.getElementById('custom-domain').value.trim().replace(/^www\./, '');
     const cat    = document.getElementById('custom-cat').value;
-    if (!domain) { alert('Please enter a domain.'); return; }
+    if (!domain) { alert('Please enter a domain name.'); return; }
 
     const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
     customCategories[domain] = cat;
     await chrome.storage.local.set({ customCategories });
     document.getElementById('custom-domain').value = '';
-    alert(`✓ ${domain} → ${cat}`);
+    alert(`Saved: ${domain} -> ${cat}`);
   };
 }
 

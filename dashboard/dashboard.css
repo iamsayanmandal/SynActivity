@@ -128,6 +128,24 @@ body { display: flex; min-height: 100vh; }
 .status-dot.active { background: var(--green); animation: pulse 2s ease-in-out infinite; }
 .status-dot.paused { background: var(--orange); }
 
+.sidebar-credit {
+  padding: 10px 18px 0;
+  font-size: 10px;
+  color: var(--text-3);
+  line-height: 1.8;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.sidebar-credit a {
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color 0.15s;
+  display: block;
+}
+.sidebar-credit a:hover { color: var(--purple-l); }
+.sidebar-credit .gh-link { font-size: 9px; letter-spacing: 0.3px; }
+
 @keyframes pulse {
   0%,100% { opacity:1; transform:scale(1); }
   50% { opacity:.5; transform:scale(0.75); }

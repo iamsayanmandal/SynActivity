@@ -1,0 +1,43 @@
+name: Release Extension ZIP
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build extension ZIP
+        run: |
+          zip -r SynActivity.zip \
+            manifest.json \
+            background/ \
+            popup/ \
+            dashboard/ \
+            icons/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "SynActivity ${{ github.ref_name }}"
+          body: |
+            ## Install
+
+            1. Download **SynActivity.zip** below
+            2. Extract the ZIP
+            3. Open `chrome://extensions` in Chrome
+            4. Enable **Developer Mode** (top-right toggle)
+            5. Click **Load unpacked** and select the extracted folder
+
+            Your existing tracking data is fully preserved when updating.
+          files: SynActivity.zip
+          generate_release_notes: false
