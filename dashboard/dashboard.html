@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SynActivity — Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <!-- ── Sidebar ───────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9" stroke="#7c3aed" stroke-width="2"/>
+          <path d="M12 7v5l3 3" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">SynActivity</div>
+        <div class="brand-sub">Time Tracker</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-view="today" id="nav-today">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Today
+      </button>
+      <button class="nav-btn" data-view="week" id="nav-week">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        This Week
+      </button>
+      <button class="nav-btn" data-view="month" id="nav-month">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 4h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/><path d="M2 9h20M8 2v4M16 2v4M7 14h2M11 14h2M15 14h2M7 18h2M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        This Month
+      </button>
+    </nav>
+
+    <div class="sidebar-sep"></div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-btn" id="nav-settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <!-- Tracking status badge -->
+    <div class="sidebar-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Loading…</span>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Page title row -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title" id="page-title">Today</h1>
+        <div class="page-date" id="page-date"></div>
+      </div>
+      <div class="header-actions">
+        <label class="toggle-wrap">
+          <input type="checkbox" id="global-toggle" checked />
+          <span class="toggle-pill"></span>
+          <span class="toggle-label">Tracking</span>
+        </label>
+        <button class="btn-export" id="btn-export">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export JSON
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Stats Cards ── -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="stat-body">
+          <div class="stat-val" id="sc-total">—</div>
+          <div class="stat-lbl">Total Time</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="stat-body">
+          <div class="stat-val" id="sc-sites">—</div>
+          <div class="stat-lbl">Sites Visited</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="stat-body">
+          <div class="stat-val" id="sc-top">—</div>
+          <div class="stat-lbl">Top Site</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="4" height="18" rx="1" stroke="currentColor" stroke-width="2"/><rect x="10" y="8" width="4" height="13" rx="1" stroke="currentColor" stroke-width="2"/><rect x="17" y="13" width="4" height="8" rx="1" stroke="currentColor" stroke-width="2"/></svg></div>
+        <div class="stat-body">
+          <div class="stat-val" id="sc-visits">—</div>
+          <div class="stat-lbl">Total Visits</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Charts Row ── -->
+    <div class="charts-row">
+      <!-- Bar chart -->
+      <div class="chart-card bar-chart-card">
+        <div class="chart-header">
+          <span class="chart-title">Top Sites</span>
+          <span class="chart-sub" id="bar-sub">by time</span>
+        </div>
+        <div class="bar-chart-wrap" id="bar-chart-wrap">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Donut chart -->
+      <div class="chart-card donut-chart-card">
+        <div class="chart-header">
+          <span class="chart-title">By Category</span>
+        </div>
+        <div class="donut-wrap">
+          <canvas id="donut-canvas" width="200" height="200"></canvas>
+          <div class="donut-center" id="donut-center">
+            <div class="donut-time" id="donut-time">—</div>
+            <div class="donut-label">total</div>
+          </div>
+        </div>
+        <div class="donut-legend" id="donut-legend"></div>
+      </div>
+    </div>
+
+    <!-- ── Trend Chart (7-day / 30-day bar) ── -->
+    <div class="card trend-card" id="trend-card">
+      <div class="chart-header">
+        <span class="chart-title">Daily Trend</span>
+        <span class="chart-sub" id="trend-sub"></span>
+      </div>
+      <canvas id="trend-canvas" height="80"></canvas>
+    </div>
+
+    <!-- ── Table ── -->
+    <div class="card table-card">
+      <div class="table-header">
+        <span class="chart-title">All Sites</span>
+        <div class="table-controls">
+          <div class="search-wrap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input type="text" id="table-search" placeholder="Search sites…" />
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th data-col="hostname" class="sortable">Site <span class="sort-arrow">↕</span></th>
+              <th>Category</th>
+              <th data-col="totalSeconds" class="sortable active-sort sort-desc">Time <span class="sort-arrow">↓</span></th>
+              <th data-col="visits" class="sortable">Visits <span class="sort-arrow">↕</span></th>
+              <th data-col="lastVisit" class="sortable">Last Visit <span class="sort-arrow">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr><td colspan="5" class="table-loading"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Settings Panel ── -->
+    <div class="card settings-card" id="settings-panel" style="display:none">
+      <div class="chart-header">
+        <span class="chart-title">Settings</span>
+      </div>
+
+      <div class="settings-grid">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Idle Timeout</div>
+            <div class="setting-desc">Stop counting when you're inactive for this long</div>
+          </div>
+          <div class="setting-control">
+            <input type="range" id="idle-slider" min="15" max="300" step="15" value="60" />
+            <span class="slider-val" id="idle-val">60s</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Custom Category</div>
+            <div class="setting-desc">Assign a category to a specific domain</div>
+          </div>
+          <div class="setting-control inline">
+            <input type="text" id="custom-domain" placeholder="example.com" class="text-input" />
+            <select id="custom-cat" class="select-input">
+              <option>Social</option>
+              <option>Development</option>
+              <option>Entertainment</option>
+              <option>Productivity</option>
+              <option>Search</option>
+              <option>AI</option>
+              <option>News</option>
+              <option>Other</option>
+            </select>
+            <button class="btn-add" id="btn-add-cat">Add</button>
+          </div>
+        </div>
+
+        <div class="setting-row danger-zone">
+          <div class="setting-info">
+            <div class="setting-name">Danger Zone</div>
+            <div class="setting-desc">Permanently delete all tracked data</div>
+          </div>
+          <div class="setting-control">
+            <button class="btn-danger" id="btn-clear">🗑 Clear All Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SynActivity</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-ring">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9" stroke="#7c3aed" stroke-width="2"/>
+          <path d="M12 7v5l3 3" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="app-name">SynActivity</span>
+    </div>
+    <label class="toggle" title="Enable / disable tracking">
+      <input type="checkbox" id="toggle-tracking" checked />
+      <span class="toggle-slider"></span>
+    </label>
+  </header>
+
+  <!-- Now Tracking -->
+  <div class="now-section">
+    <div class="now-label">NOW TRACKING</div>
+    <div class="now-site" id="now-site">
+      <span class="now-dot" id="now-dot"></span>
+      <span id="now-hostname">Loading…</span>
+    </div>
+  </div>
+
+  <!-- Today's Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-total">—</div>
+      <div class="stat-label">Total Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-sites">—</div>
+      <div class="stat-label">Sites Visited</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-top-cat">—</div>
+      <div class="stat-label">Top Category</div>
+    </div>
+  </div>
+
+  <!-- Site List -->
+  <div class="section-header">
+    <span>TOP SITES TODAY</span>
+  </div>
+  <div class="sites-list" id="sites-list">
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <button class="btn-dashboard" id="open-dashboard">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      Open Dashboard
+    </button>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
