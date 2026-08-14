@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SynActivity",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Tracks actual time spent on websites. 100% local — no cloud, no internet, no data leaks.",
 
   "permissions": [
