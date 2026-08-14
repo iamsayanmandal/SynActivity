@@ -134,8 +134,15 @@ function getCategory(hostname, customCategories = {}) {
   return 'Other';
 }
 
+function getLocalDateString(d = new Date()) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function getToday() {
-  return new Date().toISOString().split('T')[0];
+  return getLocalDateString(new Date());
 }
 
 function extractHostname(url) {
@@ -161,59 +168,98 @@ async function getCurrentState() {
   return chrome.storage.session.get({
     hostname: null,
     startTime: null,
+    lastHeartbeat: null,
     isTracking: false,
     chromeFocused: true,
     userIdle: false,
   });
 }
 
+/** Save elapsed seconds to chrome.storage.local under the correct local date key */
+async function saveTimeForHost(hostname, elapsedSeconds, sessionStartTime) {
+  if (!hostname || elapsedSeconds < 1) return;
+
+  const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
+  const dateObj = sessionStartTime ? new Date(sessionStartTime) : new Date();
+  const dayKey = `day_${getLocalDateString(dateObj)}`;
+  const stored = await chrome.storage.local.get({ [dayKey]: {} });
+  const sites = stored[dayKey] || {};
+
+  if (!sites[hostname]) {
+    sites[hostname] = {
+      totalSeconds: 0,
+      visits: 0,
+      firstVisit: sessionStartTime || Date.now(),
+      lastVisit: Date.now(),
+      category: getCategory(hostname, customCategories),
+    };
+  }
+
+  sites[hostname].totalSeconds += elapsedSeconds;
+  sites[hostname].lastVisit = Date.now();
+
+  await chrome.storage.local.set({ [dayKey]: sites });
+}
+
 /** Write partial elapsed time for the current session without ending it. */
 async function flushPartialSession(state) {
   if (!state.isTracking || !state.hostname || !state.startTime) return;
 
-  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-  if (elapsed < 1) return;
+  const now = Date.now();
+  const lastHeartbeat = state.lastHeartbeat || state.startTime;
+  const gapSinceLastCheck = Math.floor((now - lastHeartbeat) / 1000);
 
-  const dayKey = `day_${getToday()}`;
-  const stored = await chrome.storage.local.get({ [dayKey]: {} });
-  const sites = stored[dayKey];
-
-  if (sites[state.hostname]) {
-    sites[state.hostname].totalSeconds += elapsed;
-    sites[state.hostname].lastVisit = Date.now();
-    await chrome.storage.local.set({ [dayKey]: sites });
+  // If gap > 120 seconds, computer slept/hibernated or SW was frozen
+  if (gapSinceLastCheck > 120) {
+    const elapsedBeforeSleep = Math.min(30, Math.floor((lastHeartbeat - state.startTime) / 1000));
+    if (elapsedBeforeSleep > 0) {
+      await saveTimeForHost(state.hostname, elapsedBeforeSleep, state.startTime);
+    }
+    // Reset tracking start time to now
+    await chrome.storage.session.set({
+      startTime: now,
+      lastHeartbeat: now,
+    });
+    return;
   }
 
-  // Reset startTime so we don't double-count
-  await chrome.storage.session.set({ startTime: Date.now() });
+  const elapsed = Math.floor((now - state.startTime) / 1000);
+  if (elapsed < 1) return;
+
+  await saveTimeForHost(state.hostname, elapsed, state.startTime);
+
+  // Reset startTime & lastHeartbeat to now so we don't double-count
+  await chrome.storage.session.set({
+    startTime: now,
+    lastHeartbeat: now,
+  });
 }
 
 /** Stop the current session — compute elapsed and persist it. */
 async function stopSession(state) {
   if (!state.hostname || !state.startTime || !state.isTracking) return;
 
-  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-  if (elapsed < 1) return;
+  const now = Date.now();
+  const lastHeartbeat = state.lastHeartbeat || state.startTime;
+  const gapSinceLastCheck = Math.floor((now - lastHeartbeat) / 1000);
 
-  const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
-  const dayKey = `day_${getToday()}`;
-  const stored = await chrome.storage.local.get({ [dayKey]: {} });
-  const sites = stored[dayKey];
-
-  if (!sites[state.hostname]) {
-    sites[state.hostname] = {
-      totalSeconds: 0,
-      visits: 0,
-      firstVisit: state.startTime,
-      lastVisit: Date.now(),
-      category: getCategory(state.hostname, customCategories),
-    };
+  let elapsed;
+  if (gapSinceLastCheck > 120) {
+    elapsed = Math.min(30, Math.floor((lastHeartbeat - state.startTime) / 1000));
+  } else {
+    elapsed = Math.floor((now - state.startTime) / 1000);
   }
 
-  sites[state.hostname].totalSeconds += elapsed;
-  sites[state.hostname].lastVisit = Date.now();
+  if (elapsed >= 1) {
+    await saveTimeForHost(state.hostname, elapsed, state.startTime);
+  }
 
-  await chrome.storage.local.set({ [dayKey]: sites });
+  await chrome.storage.session.set({
+    ...state,
+    isTracking: false,
+    startTime: null,
+    lastHeartbeat: null,
+  });
 }
 
 /**
@@ -224,6 +270,7 @@ async function startSession(hostname, currentState) {
   await stopSession(currentState);
 
   const shouldStart = hostname && currentState.chromeFocused && !currentState.userIdle;
+  const now = Date.now();
 
   if (shouldStart) {
     const { trackingEnabled = true } = await chrome.storage.local.get({ trackingEnabled: true });
@@ -232,6 +279,7 @@ async function startSession(hostname, currentState) {
         ...currentState,
         hostname,
         startTime: null,
+        lastHeartbeat: null,
         isTracking: false,
       });
       return;
@@ -239,16 +287,16 @@ async function startSession(hostname, currentState) {
 
     // Record visit count + firstVisit if new
     const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
-    const dayKey = `day_${getToday()}`;
+    const dayKey = `day_${getLocalDateString(new Date(now))}`;
     const stored = await chrome.storage.local.get({ [dayKey]: {} });
-    const sites = stored[dayKey];
+    const sites = stored[dayKey] || {};
 
     if (!sites[hostname]) {
       sites[hostname] = {
         totalSeconds: 0,
         visits: 0,
-        firstVisit: Date.now(),
-        lastVisit: Date.now(),
+        firstVisit: now,
+        lastVisit: now,
         category: getCategory(hostname, customCategories),
       };
     }
@@ -257,13 +305,14 @@ async function startSession(hostname, currentState) {
     if (hostname !== currentState.hostname) {
       sites[hostname].visits += 1;
     }
-    sites[hostname].lastVisit = Date.now();
+    sites[hostname].lastVisit = now;
     await chrome.storage.local.set({ [dayKey]: sites });
 
     await chrome.storage.session.set({
       ...currentState,
       hostname,
-      startTime: Date.now(),
+      startTime: now,
+      lastHeartbeat: now,
       isTracking: true,
     });
   } else {
@@ -271,6 +320,7 @@ async function startSession(hostname, currentState) {
       ...currentState,
       hostname: hostname || null,
       startTime: null,
+      lastHeartbeat: null,
       isTracking: false,
     });
   }
@@ -374,6 +424,12 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   await flushPartialSession(state);
 });
 
+/** Chrome extension suspend/unload — save active session cleanly */
+chrome.runtime.onSuspend.addListener(async () => {
+  const state = await getCurrentState();
+  await stopSession(state);
+});
+
 // ─── Initialization ───────────────────────────────────────────────────────────
 
 chrome.runtime.onInstalled.addListener(async (details) => {
@@ -405,6 +461,7 @@ chrome.runtime.onStartup.addListener(async () => {
   await chrome.storage.session.set({
     hostname: null,
     startTime: null,
+    lastHeartbeat: null,
     isTracking: false,
     chromeFocused: true,
     userIdle: false,
@@ -437,7 +494,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const state = await getCurrentState();
         if (!message.enabled) {
           await stopSession(state);
-          await chrome.storage.session.set({ ...state, isTracking: false, startTime: null });
+          await chrome.storage.session.set({ ...state, isTracking: false, startTime: null, lastHeartbeat: null });
         } else {
           const hostname = await getActiveTabHostname();
           await startSession(hostname, state);
@@ -457,14 +514,31 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       case 'GET_TODAY': {
         const dayKey = `day_${getToday()}`;
         const stored = await chrome.storage.local.get({ [dayKey]: {} });
-        const sites = JSON.parse(JSON.stringify(stored[dayKey])); // deep clone
+        const sites = JSON.parse(JSON.stringify(stored[dayKey] || {})); // deep clone
 
-        // Merge live partial session
+        // Merge live partial session if applicable
         const state = await getCurrentState();
         if (state.isTracking && state.hostname && state.startTime) {
-          const partial = Math.floor((Date.now() - state.startTime) / 1000);
+          const now = Date.now();
+          const lastHeartbeat = state.lastHeartbeat || state.startTime;
+          const gap = Math.floor((now - lastHeartbeat) / 1000);
+
+          let partial = 0;
+          if (gap <= 120) {
+            partial = Math.floor((now - state.startTime) / 1000);
+          }
+
           if (partial > 0) {
-            if (sites[state.hostname]) {
+            if (!sites[state.hostname]) {
+              const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
+              sites[state.hostname] = {
+                totalSeconds: partial,
+                visits: 1,
+                firstVisit: state.startTime,
+                lastVisit: now,
+                category: getCategory(state.hostname, customCategories),
+              };
+            } else {
               sites[state.hostname] = {
                 ...sites[state.hostname],
                 totalSeconds: sites[state.hostname].totalSeconds + partial,
@@ -478,7 +552,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
 
       case 'GET_RANGE': {
-        // message.days: number of past days to aggregate
         const days = Math.max(1, Math.min(365, Number(message.days) || 7));
         const allSites = {};
         const now = new Date();
@@ -486,15 +559,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         for (let i = 0; i < days; i++) {
           const d = new Date(now);
           d.setDate(d.getDate() - i);
-          const key = `day_${d.toISOString().split('T')[0]}`;
+          const key = `day_${getLocalDateString(d)}`;
           const stored = await chrome.storage.local.get({ [key]: {} });
+          const daySites = stored[key] || {};
 
-          for (const [host, stats] of Object.entries(stored[key])) {
+          for (const [host, stats] of Object.entries(daySites)) {
             if (!allSites[host]) {
               allSites[host] = { ...stats, totalSeconds: 0, visits: 0 };
             }
-            allSites[host].totalSeconds += stats.totalSeconds;
-            allSites[host].visits += stats.visits;
+            allSites[host].totalSeconds += stats.totalSeconds || 0;
+            allSites[host].visits += stats.visits || 0;
             allSites[host].lastVisit = Math.max(allSites[host].lastVisit || 0, stats.lastVisit || 0);
             allSites[host].firstVisit = Math.min(allSites[host].firstVisit || Infinity, stats.firstVisit || Infinity);
           }
@@ -503,9 +577,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // Merge live partial session for today
         const state = await getCurrentState();
         if (state.isTracking && state.hostname && state.startTime) {
-          const partial = Math.floor((Date.now() - state.startTime) / 1000);
-          if (partial > 0 && allSites[state.hostname]) {
-            allSites[state.hostname].totalSeconds += partial;
+          const nowMs = Date.now();
+          const lastHeartbeat = state.lastHeartbeat || state.startTime;
+          const gap = Math.floor((nowMs - lastHeartbeat) / 1000);
+
+          let partial = 0;
+          if (gap <= 120) {
+            partial = Math.floor((nowMs - state.startTime) / 1000);
+          }
+          if (partial > 0) {
+            if (!allSites[state.hostname]) {
+              const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
+              allSites[state.hostname] = {
+                totalSeconds: partial,
+                visits: 1,
+                firstVisit: state.startTime,
+                lastVisit: nowMs,
+                category: getCategory(state.hostname, customCategories),
+              };
+            } else {
+              allSites[state.hostname].totalSeconds += partial;
+            }
           }
         }
 
@@ -521,7 +613,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
 
       case 'GET_DAILY_BREAKDOWN': {
-        // Returns per-day totals for the last N days (for trend chart)
         const days = Math.max(1, Math.min(90, Number(message.days) || 7));
         const result = [];
         const now = new Date();
@@ -529,10 +620,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         for (let i = days - 1; i >= 0; i--) {
           const d = new Date(now);
           d.setDate(d.getDate() - i);
-          const dateStr = d.toISOString().split('T')[0];
+          const dateStr = getLocalDateString(d);
           const key = `day_${dateStr}`;
           const stored = await chrome.storage.local.get({ [key]: {} });
-          const totalSeconds = Object.values(stored[key]).reduce(
+          const daySites = stored[key] || {};
+          const totalSeconds = Object.values(daySites).reduce(
             (sum, s) => sum + (s.totalSeconds || 0), 0
           );
           result.push({ date: dateStr, totalSeconds });
@@ -549,7 +641,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         // Reset session
         const state = await getCurrentState();
-        await chrome.storage.session.set({ ...state, isTracking: false, hostname: null, startTime: null });
+        await chrome.storage.session.set({
+          ...state,
+          isTracking: false,
+          hostname: null,
+          startTime: null,
+          lastHeartbeat: null,
+        });
         sendResponse({ ok: true });
         break;
       }
@@ -557,8 +655,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       case 'CLEAR_SITE': {
         const dayKey = `day_${getToday()}`;
         const stored = await chrome.storage.local.get({ [dayKey]: {} });
-        delete stored[dayKey][message.hostname];
-        await chrome.storage.local.set({ [dayKey]: stored[dayKey] });
+        if (stored[dayKey]) {
+          delete stored[dayKey][message.hostname];
+          await chrome.storage.local.set({ [dayKey]: stored[dayKey] });
+        }
         sendResponse({ ok: true });
         break;
       }

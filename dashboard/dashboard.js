@@ -302,7 +302,8 @@ function renderTrendChart(trendData) {
 
       // Date label
       if (progress >= 1) {
-        const d = new Date(day.date);
+        const [y, m, dayNum] = day.date.split('-').map(Number);
+        const d = new Date(y, m - 1, dayNum);
         const label = d.toLocaleDateString('en-US', { weekday: n <= 7 ? 'short' : undefined, day: 'numeric' });
         ctx.fillStyle = '#475569';
         ctx.font = `500 9px -apple-system, system-ui, sans-serif`;
@@ -519,12 +520,14 @@ async function exportData() {
     export_[key] = stored[key];
   }
 
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   const json   = JSON.stringify(export_, null, 2);
   const blob   = new Blob([json], { type: 'application/json' });
   const url    = URL.createObjectURL(blob);
   const a      = document.createElement('a');
   a.href       = url;
-  a.download   = `synactivity-export-${new Date().toISOString().split('T')[0]}.json`;
+  a.download   = `synactivity-export-${dateStr}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
