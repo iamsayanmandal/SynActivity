@@ -24,9 +24,10 @@ function msg(type, payload = {}) {
 }
 
 function formatTime(seconds) {
-  if (!seconds || seconds < 60) return `${seconds || 0}s`;
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds || 0);
+  if (s < 60) return `${s}s`;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 }

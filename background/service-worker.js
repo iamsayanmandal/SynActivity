@@ -186,23 +186,26 @@ async function _flush() {
   const state = await getCurrentState();
   if (!state.isTracking || !state.hostname || !state.startTime) return;
 
-  const now           = Date.now();
+  const snapshotNow  = Date.now();
   const lastHeartbeat = state.lastHeartbeat || state.startTime;
-  const gapMs         = now - lastHeartbeat;
+  const gapMs         = snapshotNow - lastHeartbeat;
 
   if (gapMs > 120_000) {
     // System was asleep — save only pre-gap time, then reset from now.
     const preGap = Math.min(90, Math.max(0, Math.floor((lastHeartbeat - state.startTime) / 1000)));
     if (preGap >= 1) await addTimeToStorage(state.hostname, preGap, state.startTime);
-    await chrome.storage.session.set({ startTime: now, lastHeartbeat: now });
+    // Re-read now after storage writes to minimise drift in the new chunk start.
+    const resetNow = Date.now();
+    await chrome.storage.session.set({ startTime: resetNow, lastHeartbeat: resetNow });
     return;
   }
 
-  const elapsed = Math.max(0, Math.floor((now - state.startTime) / 1000));
+  const elapsed = Math.max(0, Math.floor((snapshotNow - state.startTime) / 1000));
   if (elapsed >= 1) await addTimeToStorage(state.hostname, elapsed, state.startTime);
 
-  // Restart the chunk from now so the next flush only measures new time.
-  await chrome.storage.session.set({ startTime: now, lastHeartbeat: now });
+  // Re-read now after storage writes to minimise drift accumulated during async I/O.
+  const resetNow = Date.now();
+  await chrome.storage.session.set({ startTime: resetNow, lastHeartbeat: resetNow });
 }
 
 /**
