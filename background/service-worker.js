@@ -1,131 +1,85 @@
 // =============================================================================
-// SynActivity — Background Service Worker
+// SynActivity — Background Service Worker v1.2.0
 // 100% local. No network calls. No external dependencies.
 // =============================================================================
 
 // ─── Category Map ─────────────────────────────────────────────────────────────
 const CATEGORY_MAP = {
   // Social
-  'youtube.com': 'Social',
-  'twitter.com': 'Social',
-  'x.com': 'Social',
-  'instagram.com': 'Social',
-  'facebook.com': 'Social',
-  'reddit.com': 'Social',
-  'linkedin.com': 'Social',
-  'tiktok.com': 'Social',
-  'pinterest.com': 'Social',
-  'snapchat.com': 'Social',
-  'discord.com': 'Social',
-  'telegram.org': 'Social',
+  'youtube.com': 'Social', 'twitter.com': 'Social', 'x.com': 'Social',
+  'instagram.com': 'Social', 'facebook.com': 'Social', 'reddit.com': 'Social',
+  'linkedin.com': 'Social', 'tiktok.com': 'Social', 'pinterest.com': 'Social',
+  'snapchat.com': 'Social', 'discord.com': 'Social', 'telegram.org': 'Social',
   'whatsapp.com': 'Social',
 
   // Development
-  'github.com': 'Development',
-  'stackoverflow.com': 'Development',
-  'gitlab.com': 'Development',
-  'bitbucket.org': 'Development',
-  'codepen.io': 'Development',
-  'replit.com': 'Development',
-  'npmjs.com': 'Development',
-  'developer.mozilla.org': 'Development',
-  'docs.python.org': 'Development',
-  'pypi.org': 'Development',
-  'codesandbox.io': 'Development',
-  'jsfiddle.net': 'Development',
-  'leetcode.com': 'Development',
-  'hackerrank.com': 'Development',
-  'codeforces.com': 'Development',
-  'vercel.com': 'Development',
-  'netlify.com': 'Development',
-  'heroku.com': 'Development',
-  'docker.com': 'Development',
-  'kubernetes.io': 'Development',
-  'aws.amazon.com': 'Development',
-  'console.cloud.google.com': 'Development',
-  'azure.microsoft.com': 'Development',
-  'dev.to': 'Development',
-  'medium.com': 'Development',
-  'hashnode.com': 'Development',
+  'github.com': 'Development', 'stackoverflow.com': 'Development',
+  'gitlab.com': 'Development', 'bitbucket.org': 'Development',
+  'codepen.io': 'Development', 'replit.com': 'Development',
+  'npmjs.com': 'Development', 'developer.mozilla.org': 'Development',
+  'docs.python.org': 'Development', 'pypi.org': 'Development',
+  'codesandbox.io': 'Development', 'jsfiddle.net': 'Development',
+  'leetcode.com': 'Development', 'hackerrank.com': 'Development',
+  'codeforces.com': 'Development', 'vercel.com': 'Development',
+  'netlify.com': 'Development', 'heroku.com': 'Development',
+  'docker.com': 'Development', 'kubernetes.io': 'Development',
+  'aws.amazon.com': 'Development', 'console.cloud.google.com': 'Development',
+  'azure.microsoft.com': 'Development', 'dev.to': 'Development',
+  'medium.com': 'Development', 'hashnode.com': 'Development',
 
   // Entertainment
-  'netflix.com': 'Entertainment',
-  'spotify.com': 'Entertainment',
-  'twitch.tv': 'Entertainment',
-  'primevideo.com': 'Entertainment',
-  'hulu.com': 'Entertainment',
-  'disneyplus.com': 'Entertainment',
-  'soundcloud.com': 'Entertainment',
-  'hbomax.com': 'Entertainment',
-  'max.com': 'Entertainment',
-  'peacocktv.com': 'Entertainment',
+  'netflix.com': 'Entertainment', 'spotify.com': 'Entertainment',
+  'twitch.tv': 'Entertainment', 'primevideo.com': 'Entertainment',
+  'hulu.com': 'Entertainment', 'disneyplus.com': 'Entertainment',
+  'soundcloud.com': 'Entertainment', 'hbomax.com': 'Entertainment',
+  'max.com': 'Entertainment', 'peacocktv.com': 'Entertainment',
   'crunchyroll.com': 'Entertainment',
 
   // Productivity
-  'notion.so': 'Productivity',
-  'docs.google.com': 'Productivity',
-  'sheets.google.com': 'Productivity',
-  'slides.google.com': 'Productivity',
-  'figma.com': 'Productivity',
-  'trello.com': 'Productivity',
-  'asana.com': 'Productivity',
-  'monday.com': 'Productivity',
-  'airtable.com': 'Productivity',
-  'miro.com': 'Productivity',
-  'todoist.com': 'Productivity',
-  'calendar.google.com': 'Productivity',
-  'gmail.com': 'Productivity',
-  'mail.google.com': 'Productivity',
-  'drive.google.com': 'Productivity',
-  'dropbox.com': 'Productivity',
-  'confluence.com': 'Productivity',
-  'jira.com': 'Productivity',
-  'atlassian.com': 'Productivity',
-  'linear.app': 'Productivity',
-  'clickup.com': 'Productivity',
-  'obsidian.md': 'Productivity',
-  'roamresearch.com': 'Productivity',
-  'evernote.com': 'Productivity',
+  'notion.so': 'Productivity', 'docs.google.com': 'Productivity',
+  'sheets.google.com': 'Productivity', 'slides.google.com': 'Productivity',
+  'figma.com': 'Productivity', 'trello.com': 'Productivity',
+  'asana.com': 'Productivity', 'monday.com': 'Productivity',
+  'airtable.com': 'Productivity', 'miro.com': 'Productivity',
+  'todoist.com': 'Productivity', 'calendar.google.com': 'Productivity',
+  'gmail.com': 'Productivity', 'mail.google.com': 'Productivity',
+  'drive.google.com': 'Productivity', 'dropbox.com': 'Productivity',
+  'confluence.com': 'Productivity', 'jira.com': 'Productivity',
+  'atlassian.com': 'Productivity', 'linear.app': 'Productivity',
+  'clickup.com': 'Productivity', 'obsidian.md': 'Productivity',
+  'roamresearch.com': 'Productivity', 'evernote.com': 'Productivity',
 
   // Search
-  'google.com': 'Search',
-  'bing.com': 'Search',
-  'duckduckgo.com': 'Search',
-  'yahoo.com': 'Search',
-  'ecosia.org': 'Search',
-  'brave.com': 'Search',
+  'google.com': 'Search', 'bing.com': 'Search', 'duckduckgo.com': 'Search',
+  'yahoo.com': 'Search', 'ecosia.org': 'Search', 'brave.com': 'Search',
 
   // AI
-  'chatgpt.com': 'AI',
-  'claude.ai': 'AI',
-  'gemini.google.com': 'AI',
-  'perplexity.ai': 'AI',
-  'bard.google.com': 'AI',
-  'copilot.microsoft.com': 'AI',
-  'poe.com': 'AI',
-  'huggingface.co': 'AI',
-  'cohere.com': 'AI',
-  'mistral.ai': 'AI',
+  'chatgpt.com': 'AI', 'claude.ai': 'AI', 'gemini.google.com': 'AI',
+  'perplexity.ai': 'AI', 'bard.google.com': 'AI',
+  'copilot.microsoft.com': 'AI', 'poe.com': 'AI',
+  'huggingface.co': 'AI', 'cohere.com': 'AI', 'mistral.ai': 'AI',
 
   // News
-  'news.ycombinator.com': 'News',
-  'techcrunch.com': 'News',
-  'theverge.com': 'News',
-  'bbc.com': 'News',
-  'cnn.com': 'News',
-  'nytimes.com': 'News',
-  'wired.com': 'News',
-  'arstechnica.com': 'News',
+  'news.ycombinator.com': 'News', 'techcrunch.com': 'News',
+  'theverge.com': 'News', 'bbc.com': 'News', 'cnn.com': 'News',
+  'nytimes.com': 'News', 'wired.com': 'News', 'arstechnica.com': 'News',
   'thenextweb.com': 'News',
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Async Mutex ──────────────────────────────────────────────────────────────
+// Ensures all session operations are serialised — no two handlers can
+// interleave their await chains and double-count the same seconds.
+let _lock = Promise.resolve();
+function withLock(fn) {
+  _lock = _lock.then(() => fn()).catch(() => {});
+  return _lock;
+}
+
+// ─── Pure Helpers ─────────────────────────────────────────────────────────────
 
 function getCategory(hostname, customCategories = {}) {
   if (customCategories[hostname]) return customCategories[hostname];
-  if (CATEGORY_MAP[hostname]) return CATEGORY_MAP[hostname];
-
-  // Subdomain fallback: news.google.com → google.com
+  if (CATEGORY_MAP[hostname])     return CATEGORY_MAP[hostname];
   const parts = hostname.split('.');
   for (let i = 1; i < parts.length - 1; i++) {
     const candidate = parts.slice(i).join('.');
@@ -135,348 +89,292 @@ function getCategory(hostname, customCategories = {}) {
 }
 
 function getLocalDateString(d = new Date()) {
-  const year = d.getFullYear();
+  const year  = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const day   = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-function getToday() {
-  return getLocalDateString(new Date());
-}
+function getToday() { return getLocalDateString(new Date()); }
 
 function extractHostname(url) {
   if (!url) return null;
-  if (
-    url.startsWith('chrome://') ||
-    url.startsWith('chrome-extension://') ||
-    url.startsWith('about:') ||
-    url.startsWith('edge://') ||
-    url.startsWith('devtools://')
-  ) return null;
-  try {
-    return new URL(url).hostname.replace(/^www\./, '');
-  } catch {
-    return null;
-  }
+  if (url.startsWith('chrome://') || url.startsWith('chrome-extension://') ||
+      url.startsWith('about:')    || url.startsWith('edge://') ||
+      url.startsWith('devtools://')) return null;
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return null; }
 }
 
-// ─── Storage Helpers ──────────────────────────────────────────────────────────
+// ─── Storage ──────────────────────────────────────────────────────────────────
 
-/** Read the current ephemeral tracking state (survives SW restart). */
 async function getCurrentState() {
   return chrome.storage.session.get({
-    hostname: null,
-    startTime: null,
+    hostname:      null,
+    startTime:     null,
     lastHeartbeat: null,
-    isTracking: false,
+    isTracking:    false,
     chromeFocused: true,
-    userIdle: false,
-  });
-}
-
-/** Save elapsed seconds to chrome.storage.local under the correct local date key */
-async function saveTimeForHost(hostname, elapsedSeconds, sessionStartTime) {
-  if (!hostname || elapsedSeconds < 1) return;
-
-  const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
-  const dateObj = sessionStartTime ? new Date(sessionStartTime) : new Date();
-  const dayKey = `day_${getLocalDateString(dateObj)}`;
-  const stored = await chrome.storage.local.get({ [dayKey]: {} });
-  const sites = stored[dayKey] || {};
-
-  if (!sites[hostname]) {
-    sites[hostname] = {
-      totalSeconds: 0,
-      visits: 0,
-      firstVisit: sessionStartTime || Date.now(),
-      lastVisit: Date.now(),
-      category: getCategory(hostname, customCategories),
-    };
-  }
-
-  sites[hostname].totalSeconds += elapsedSeconds;
-  sites[hostname].lastVisit = Date.now();
-
-  await chrome.storage.local.set({ [dayKey]: sites });
-}
-
-/** Write partial elapsed time for the current session without ending it. */
-async function flushPartialSession(state) {
-  if (!state.isTracking || !state.hostname || !state.startTime) return;
-
-  const now = Date.now();
-  const lastHeartbeat = state.lastHeartbeat || state.startTime;
-  const gapSinceLastCheck = Math.floor((now - lastHeartbeat) / 1000);
-
-  // If gap > 120 seconds, computer slept/hibernated or SW was frozen
-  if (gapSinceLastCheck > 120) {
-    const elapsedBeforeSleep = Math.min(30, Math.floor((lastHeartbeat - state.startTime) / 1000));
-    if (elapsedBeforeSleep > 0) {
-      await saveTimeForHost(state.hostname, elapsedBeforeSleep, state.startTime);
-    }
-    // Reset tracking start time to now
-    await chrome.storage.session.set({
-      startTime: now,
-      lastHeartbeat: now,
-    });
-    return;
-  }
-
-  const elapsed = Math.floor((now - state.startTime) / 1000);
-  if (elapsed < 1) return;
-
-  await saveTimeForHost(state.hostname, elapsed, state.startTime);
-
-  // Reset startTime & lastHeartbeat to now so we don't double-count
-  await chrome.storage.session.set({
-    startTime: now,
-    lastHeartbeat: now,
-  });
-}
-
-/** Stop the current session — compute elapsed and persist it. */
-async function stopSession(state) {
-  if (!state.hostname || !state.startTime || !state.isTracking) return;
-
-  const now = Date.now();
-  const lastHeartbeat = state.lastHeartbeat || state.startTime;
-  const gapSinceLastCheck = Math.floor((now - lastHeartbeat) / 1000);
-
-  let elapsed;
-  if (gapSinceLastCheck > 120) {
-    elapsed = Math.min(30, Math.floor((lastHeartbeat - state.startTime) / 1000));
-  } else {
-    elapsed = Math.floor((now - state.startTime) / 1000);
-  }
-
-  if (elapsed >= 1) {
-    await saveTimeForHost(state.hostname, elapsed, state.startTime);
-  }
-
-  await chrome.storage.session.set({
-    ...state,
-    isTracking: false,
-    startTime: null,
-    lastHeartbeat: null,
+    userIdle:      false,
   });
 }
 
 /**
- * Stop the previous session and begin a new one on `hostname`.
- * If hostname is null or conditions aren't met, just stops.
+ * Persist `elapsedSeconds` for `hostname` under the local date that
+ * corresponds to `chunkStartTime` (so midnight-crossing is handled correctly).
  */
-async function startSession(hostname, currentState) {
-  await stopSession(currentState);
+async function addTimeToStorage(hostname, elapsedSeconds, chunkStartTime) {
+  if (!hostname || elapsedSeconds < 1) return;
 
-  const shouldStart = hostname && currentState.chromeFocused && !currentState.userIdle;
-  const now = Date.now();
+  const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
+  const dateKey = `day_${getLocalDateString(new Date(chunkStartTime))}`;
+  const stored  = await chrome.storage.local.get({ [dateKey]: {} });
+  const sites   = stored[dateKey] || {};
 
-  if (shouldStart) {
-    const { trackingEnabled = true } = await chrome.storage.local.get({ trackingEnabled: true });
-    if (!trackingEnabled) {
-      await chrome.storage.session.set({
-        ...currentState,
-        hostname,
-        startTime: null,
-        lastHeartbeat: null,
-        isTracking: false,
-      });
-      return;
-    }
+  if (!sites[hostname]) {
+    sites[hostname] = {
+      totalSeconds: 0,
+      visits:       0,
+      firstVisit:   chunkStartTime,
+      lastVisit:    chunkStartTime,
+      category:     getCategory(hostname, customCategories),
+    };
+  }
 
-    // Record visit count + firstVisit if new
+  sites[hostname].totalSeconds += elapsedSeconds;
+  sites[hostname].lastVisit    = Date.now();
+
+  await chrome.storage.local.set({ [dateKey]: sites });
+}
+
+// ─── Core Session Primitives (must be called inside withLock) ─────────────────
+
+/**
+ * Calculate how many seconds to credit for the current open chunk,
+ * applying the sleep-gap cap if the system was suspended.
+ * Returns 0 if there is nothing to commit.
+ */
+function _calcElapsed(state) {
+  if (!state.isTracking || !state.startTime) return 0;
+
+  const now           = Date.now();
+  const lastHeartbeat = state.lastHeartbeat || state.startTime;
+  const gapMs         = now - lastHeartbeat;
+
+  if (gapMs > 120_000) {
+    // Gap > 2 min means sleep/hibernate.  Only credit the time before the gap.
+    return Math.min(90, Math.max(0, Math.floor((lastHeartbeat - state.startTime) / 1000)));
+  }
+  return Math.max(0, Math.floor((now - state.startTime) / 1000));
+}
+
+/**
+ * Save the current chunk's elapsed time and clear the chunk markers.
+ * Leaves isTracking / hostname / chromeFocused / userIdle unchanged.
+ */
+async function _commitChunk(state) {
+  const elapsed = _calcElapsed(state);
+  if (elapsed >= 1) {
+    await addTimeToStorage(state.hostname, elapsed, state.startTime);
+  }
+  await chrome.storage.session.set({ startTime: null, lastHeartbeat: null });
+}
+
+/**
+ * Heartbeat flush: save elapsed time and restart the chunk from now.
+ */
+async function _flush() {
+  const state = await getCurrentState();
+  if (!state.isTracking || !state.hostname || !state.startTime) return;
+
+  const now           = Date.now();
+  const lastHeartbeat = state.lastHeartbeat || state.startTime;
+  const gapMs         = now - lastHeartbeat;
+
+  if (gapMs > 120_000) {
+    // System was asleep — save only pre-gap time, then reset from now.
+    const preGap = Math.min(90, Math.max(0, Math.floor((lastHeartbeat - state.startTime) / 1000)));
+    if (preGap >= 1) await addTimeToStorage(state.hostname, preGap, state.startTime);
+    await chrome.storage.session.set({ startTime: now, lastHeartbeat: now });
+    return;
+  }
+
+  const elapsed = Math.max(0, Math.floor((now - state.startTime) / 1000));
+  if (elapsed >= 1) await addTimeToStorage(state.hostname, elapsed, state.startTime);
+
+  // Restart the chunk from now so the next flush only measures new time.
+  await chrome.storage.session.set({ startTime: now, lastHeartbeat: now });
+}
+
+/**
+ * Switch to a new hostname (or stop if newHostname is null).
+ * overrides: partial state fields to apply (e.g. { chromeFocused: false }).
+ */
+async function _transition(newHostname, overrides = {}) {
+  const state = await getCurrentState();
+  await _commitChunk(state);
+
+  const next = { ...state, ...overrides };
+
+  const { trackingEnabled = true } = await chrome.storage.local.get({ trackingEnabled: true });
+  const shouldTrack = newHostname && next.chromeFocused && !next.userIdle && trackingEnabled;
+
+  if (shouldTrack) {
+    const now     = Date.now();
+    const dateKey = `day_${getLocalDateString(new Date(now))}`;
     const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
-    const dayKey = `day_${getLocalDateString(new Date(now))}`;
-    const stored = await chrome.storage.local.get({ [dayKey]: {} });
-    const sites = stored[dayKey] || {};
+    const stored  = await chrome.storage.local.get({ [dateKey]: {} });
+    const sites   = stored[dateKey] || {};
 
-    if (!sites[hostname]) {
-      sites[hostname] = {
-        totalSeconds: 0,
-        visits: 0,
-        firstVisit: now,
-        lastVisit: now,
-        category: getCategory(hostname, customCategories),
+    const isNew = !sites[newHostname];
+    if (isNew) {
+      sites[newHostname] = {
+        totalSeconds: 0, visits: 0,
+        firstVisit: now, lastVisit: now,
+        category: getCategory(newHostname, customCategories),
       };
     }
 
-    // Only count as a visit if it's a different hostname than previous
-    if (hostname !== currentState.hostname) {
-      sites[hostname].visits += 1;
+    // Only increment visit count when navigating TO a different site.
+    if (newHostname !== state.hostname || isNew) {
+      sites[newHostname].visits += 1;
     }
-    sites[hostname].lastVisit = now;
-    await chrome.storage.local.set({ [dayKey]: sites });
+    sites[newHostname].lastVisit = now;
+    await chrome.storage.local.set({ [dateKey]: sites });
 
     await chrome.storage.session.set({
-      ...currentState,
-      hostname,
-      startTime: now,
+      ...next,
+      hostname:      newHostname,
+      startTime:     now,
       lastHeartbeat: now,
-      isTracking: true,
+      isTracking:    true,
     });
   } else {
     await chrome.storage.session.set({
-      ...currentState,
-      hostname: hostname || null,
-      startTime: null,
+      ...next,
+      hostname:      newHostname || null,
+      startTime:     null,
       lastHeartbeat: null,
-      isTracking: false,
+      isTracking:    false,
     });
   }
 }
 
-/** Get the hostname of the currently active, focused tab. */
+/** Pause tracking (commit chunk, clear timer, apply state overrides). */
+async function _pause(overrides = {}) {
+  const state = await getCurrentState();
+  await _commitChunk(state);
+  await chrome.storage.session.set({
+    ...state,
+    ...overrides,
+    startTime:     null,
+    lastHeartbeat: null,
+    isTracking:    false,
+  });
+}
+
+// ─── Active tab helper ────────────────────────────────────────────────────────
+
 async function getActiveTabHostname() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     return tab ? extractHostname(tab.url) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
-// ─── Event Listeners (must all be registered synchronously at top level) ──────
+// ─── Event Listeners ──────────────────────────────────────────────────────────
 
-/** Active tab switched */
-chrome.tabs.onActivated.addListener(async (activeInfo) => {
-  try {
-    const [state, tab] = await Promise.all([
-      getCurrentState(),
-      chrome.tabs.get(activeInfo.tabId),
-    ]);
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  withLock(async () => {
+    try {
+      const tab = await chrome.tabs.get(activeInfo.tabId);
+      await _transition(extractHostname(tab.url));
+    } catch { /* tab was closed immediately */ }
+  });
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status !== 'complete' || !tab.active) return;
+  withLock(async () => {
+    const state    = await getCurrentState();
     const hostname = extractHostname(tab.url);
-    await startSession(hostname, state);
-  } catch {
-    // Tab may have been closed immediately
-  }
+    // Only transition when the hostname actually changed.
+    if (hostname !== state.hostname) await _transition(hostname);
+  });
 });
 
-/** Tab URL changed (navigation within a tab) */
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status !== 'complete') return;
-  if (!tab.active) return;
-
-  const state = await getCurrentState();
-  const hostname = extractHostname(tab.url);
-
-  // Only transition if hostname actually changed
-  if (hostname !== state.hostname) {
-    await startSession(hostname, state);
-  }
+chrome.tabs.onRemoved.addListener(() => {
+  withLock(async () => {
+    await new Promise(r => setTimeout(r, 60));
+    await _transition(await getActiveTabHostname());
+  });
 });
 
-/** Tab closed — find new active tab */
-chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
-  const state = await getCurrentState();
-  if (!state.isTracking) return;
-
-  // Give Chrome a tick to update the active tab
-  await new Promise(r => setTimeout(r, 50));
-  const hostname = await getActiveTabHostname();
-  await startSession(hostname, state);
+chrome.windows.onFocusChanged.addListener((windowId) => {
+  withLock(async () => {
+    if (windowId === chrome.windows.WINDOW_ID_NONE) {
+      await _pause({ chromeFocused: false });
+    } else {
+      await _transition(await getActiveTabHostname(), { chromeFocused: true });
+    }
+  });
 });
 
-/** Chrome window focus changed */
-chrome.windows.onFocusChanged.addListener(async (windowId) => {
-  const state = await getCurrentState();
-
-  if (windowId === chrome.windows.WINDOW_ID_NONE) {
-    // Chrome lost focus entirely
-    await stopSession(state);
-    await chrome.storage.session.set({
-      ...state,
-      chromeFocused: false,
-      startTime: null,
-      isTracking: false,
-    });
-  } else {
-    // Chrome gained focus
-    const hostname = await getActiveTabHostname();
-    const newState = { ...state, chromeFocused: true };
-    await startSession(hostname, newState);
-  }
+chrome.idle.onStateChanged.addListener((idleState) => {
+  withLock(async () => {
+    if (idleState === 'idle' || idleState === 'locked') {
+      await _pause({ userIdle: true });
+    } else if (idleState === 'active') {
+      await _transition(await getActiveTabHostname(), { userIdle: false });
+    }
+  });
 });
 
-/** System idle state changed */
-chrome.idle.onStateChanged.addListener(async (idleState) => {
-  const state = await getCurrentState();
-
-  if (idleState === 'idle' || idleState === 'locked') {
-    await stopSession(state);
-    await chrome.storage.session.set({
-      ...state,
-      userIdle: true,
-      startTime: null,
-      isTracking: false,
-    });
-  } else if (idleState === 'active') {
-    const hostname = await getActiveTabHostname();
-    const newState = { ...state, userIdle: false };
-    await startSession(hostname, newState);
-  }
-});
-
-/** Heartbeat alarm — saves partial session every minute so data isn't lost if Chrome crashes */
-chrome.alarms.onAlarm.addListener(async (alarm) => {
+chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name !== 'heartbeat') return;
-  const state = await getCurrentState();
-  await flushPartialSession(state);
+  withLock(() => _flush());
 });
 
-/** Chrome extension suspend/unload — save active session cleanly */
-chrome.runtime.onSuspend.addListener(async () => {
-  const state = await getCurrentState();
-  await stopSession(state);
+chrome.runtime.onSuspend.addListener(() => {
+  withLock(async () => {
+    const state = await getCurrentState();
+    await _commitChunk(state);
+    await chrome.storage.session.set({ ...state, startTime: null, lastHeartbeat: null, isTracking: false });
+  });
 });
 
 // ─── Initialization ───────────────────────────────────────────────────────────
 
+async function _ensureAlarmAndIdle() {
+  const { idleThresholdSeconds = 60 } = await chrome.storage.local.get({ idleThresholdSeconds: 60 });
+  chrome.idle.setDetectionInterval(idleThresholdSeconds);
+  const existing = await chrome.alarms.get('heartbeat');
+  if (!existing) chrome.alarms.create('heartbeat', { periodInMinutes: 1 });
+}
+
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
-    await chrome.storage.local.set({
-      trackingEnabled: true,
-      idleThresholdSeconds: 60,
-      customCategories: {},
-    });
+    await chrome.storage.local.set({ trackingEnabled: true, idleThresholdSeconds: 60, customCategories: {} });
   }
-
-  chrome.idle.setDetectionInterval(60);
-
-  const existing = await chrome.alarms.get('heartbeat');
-  if (!existing) {
-    await chrome.alarms.create('heartbeat', { periodInMinutes: 1 });
-  }
+  await _ensureAlarmAndIdle();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
-  chrome.idle.setDetectionInterval(60);
+  await _ensureAlarmAndIdle();
 
-  const existing = await chrome.alarms.get('heartbeat');
-  if (!existing) {
-    await chrome.alarms.create('heartbeat', { periodInMinutes: 1 });
-  }
-
-  // Reset ephemeral state and resume tracking
+  // Clear ephemeral chunk state — startTime from the previous session is invalid.
   await chrome.storage.session.set({
-    hostname: null,
-    startTime: null,
-    lastHeartbeat: null,
-    isTracking: false,
-    chromeFocused: true,
-    userIdle: false,
+    hostname: null, startTime: null, lastHeartbeat: null,
+    isTracking: false, chromeFocused: true, userIdle: false,
   });
 
-  const hostname = await getActiveTabHostname();
-  if (hostname) {
-    const state = await getCurrentState();
-    await startSession(hostname, state);
-  }
+  withLock(async () => {
+    await _transition(await getActiveTabHostname());
+  });
 });
 
 // ─── Message Handler ──────────────────────────────────────────────────────────
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   (async () => {
     switch (message.type) {
 
@@ -491,14 +389,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       case 'SET_TRACKING': {
         await chrome.storage.local.set({ trackingEnabled: message.enabled });
-        const state = await getCurrentState();
-        if (!message.enabled) {
-          await stopSession(state);
-          await chrome.storage.session.set({ ...state, isTracking: false, startTime: null, lastHeartbeat: null });
-        } else {
-          const hostname = await getActiveTabHostname();
-          await startSession(hostname, state);
-        }
+        await withLock(async () => {
+          if (!message.enabled) {
+            await _pause();
+          } else {
+            await _transition(await getActiveTabHostname());
+          }
+        });
         sendResponse({ ok: true });
         break;
       }
@@ -512,152 +409,125 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
 
       case 'GET_TODAY': {
-        const dayKey = `day_${getToday()}`;
-        const stored = await chrome.storage.local.get({ [dayKey]: {} });
-        const sites = JSON.parse(JSON.stringify(stored[dayKey] || {})); // deep clone
+        const dateKey = `day_${getToday()}`;
+        const stored  = await chrome.storage.local.get({ [dateKey]: {} });
+        const sites   = JSON.parse(JSON.stringify(stored[dateKey] || {}));
 
-        // Merge live partial session if applicable
+        // Add the live un-flushed chunk so the UI reflects real-time activity.
         const state = await getCurrentState();
         if (state.isTracking && state.hostname && state.startTime) {
-          const now = Date.now();
+          const now           = Date.now();
           const lastHeartbeat = state.lastHeartbeat || state.startTime;
-          const gap = Math.floor((now - lastHeartbeat) / 1000);
-
-          let partial = 0;
-          if (gap <= 120) {
-            partial = Math.floor((now - state.startTime) / 1000);
-          }
-
-          if (partial > 0) {
-            if (!sites[state.hostname]) {
-              const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
-              sites[state.hostname] = {
-                totalSeconds: partial,
-                visits: 1,
-                firstVisit: state.startTime,
-                lastVisit: now,
-                category: getCategory(state.hostname, customCategories),
-              };
-            } else {
-              sites[state.hostname] = {
-                ...sites[state.hostname],
-                totalSeconds: sites[state.hostname].totalSeconds + partial,
-              };
+          if (now - lastHeartbeat <= 120_000) {
+            const partial = Math.floor((now - state.startTime) / 1000);
+            if (partial > 0) {
+              if (!sites[state.hostname]) {
+                const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
+                sites[state.hostname] = {
+                  totalSeconds: partial, visits: 1,
+                  firstVisit: state.startTime, lastVisit: now,
+                  category: getCategory(state.hostname, customCategories),
+                };
+              } else {
+                sites[state.hostname].totalSeconds += partial;
+              }
             }
           }
         }
-
         sendResponse({ sites });
         break;
       }
 
       case 'GET_RANGE': {
-        const days = Math.max(1, Math.min(365, Number(message.days) || 7));
+        const days     = Math.max(1, Math.min(365, Number(message.days) || 7));
         const allSites = {};
-        const now = new Date();
+        const base     = new Date();
 
         for (let i = 0; i < days; i++) {
-          const d = new Date(now);
+          const d      = new Date(base);
           d.setDate(d.getDate() - i);
-          const key = `day_${getLocalDateString(d)}`;
+          const key    = `day_${getLocalDateString(d)}`;
           const stored = await chrome.storage.local.get({ [key]: {} });
-          const daySites = stored[key] || {};
 
-          for (const [host, stats] of Object.entries(daySites)) {
+          for (const [host, s] of Object.entries(stored[key] || {})) {
             if (!allSites[host]) {
-              allSites[host] = { ...stats, totalSeconds: 0, visits: 0 };
+              allSites[host] = { totalSeconds: 0, visits: 0, firstVisit: s.firstVisit, lastVisit: s.lastVisit, category: s.category };
             }
-            allSites[host].totalSeconds += stats.totalSeconds || 0;
-            allSites[host].visits += stats.visits || 0;
-            allSites[host].lastVisit = Math.max(allSites[host].lastVisit || 0, stats.lastVisit || 0);
-            allSites[host].firstVisit = Math.min(allSites[host].firstVisit || Infinity, stats.firstVisit || Infinity);
+            allSites[host].totalSeconds += s.totalSeconds || 0;
+            allSites[host].visits       += s.visits       || 0;
+            allSites[host].lastVisit     = Math.max(allSites[host].lastVisit  || 0, s.lastVisit  || 0);
+            allSites[host].firstVisit    = Math.min(allSites[host].firstVisit || Infinity, s.firstVisit || Infinity);
           }
         }
 
-        // Merge live partial session for today
+        // Merge live chunk.
         const state = await getCurrentState();
         if (state.isTracking && state.hostname && state.startTime) {
-          const nowMs = Date.now();
+          const nowMs         = Date.now();
           const lastHeartbeat = state.lastHeartbeat || state.startTime;
-          const gap = Math.floor((nowMs - lastHeartbeat) / 1000);
-
-          let partial = 0;
-          if (gap <= 120) {
-            partial = Math.floor((nowMs - state.startTime) / 1000);
-          }
-          if (partial > 0) {
-            if (!allSites[state.hostname]) {
-              const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
-              allSites[state.hostname] = {
-                totalSeconds: partial,
-                visits: 1,
-                firstVisit: state.startTime,
-                lastVisit: nowMs,
-                category: getCategory(state.hostname, customCategories),
-              };
-            } else {
-              allSites[state.hostname].totalSeconds += partial;
+          if (nowMs - lastHeartbeat <= 120_000) {
+            const partial = Math.floor((nowMs - state.startTime) / 1000);
+            if (partial > 0) {
+              if (!allSites[state.hostname]) {
+                const { customCategories = {} } = await chrome.storage.local.get({ customCategories: {} });
+                allSites[state.hostname] = {
+                  totalSeconds: partial, visits: 1,
+                  firstVisit: state.startTime, lastVisit: nowMs,
+                  category: getCategory(state.hostname, customCategories),
+                };
+              } else {
+                allSites[state.hostname].totalSeconds += partial;
+              }
             }
           }
         }
-
         sendResponse({ sites: allSites });
         break;
       }
 
       case 'GET_ALL_KEYS': {
         const all = await chrome.storage.local.get(null);
-        const dayKeys = Object.keys(all).filter(k => k.startsWith('day_'));
-        sendResponse({ keys: dayKeys.sort() });
+        sendResponse({ keys: Object.keys(all).filter(k => k.startsWith('day_')).sort() });
         break;
       }
 
       case 'GET_DAILY_BREAKDOWN': {
-        const days = Math.max(1, Math.min(90, Number(message.days) || 7));
+        const days   = Math.max(1, Math.min(90, Number(message.days) || 7));
         const result = [];
-        const now = new Date();
+        const base   = new Date();
 
         for (let i = days - 1; i >= 0; i--) {
-          const d = new Date(now);
+          const d       = new Date(base);
           d.setDate(d.getDate() - i);
           const dateStr = getLocalDateString(d);
-          const key = `day_${dateStr}`;
-          const stored = await chrome.storage.local.get({ [key]: {} });
-          const daySites = stored[key] || {};
-          const totalSeconds = Object.values(daySites).reduce(
+          const stored  = await chrome.storage.local.get({ [`day_${dateStr}`]: {} });
+          const total   = Object.values(stored[`day_${dateStr}`] || {}).reduce(
             (sum, s) => sum + (s.totalSeconds || 0), 0
           );
-          result.push({ date: dateStr, totalSeconds });
+          result.push({ date: dateStr, totalSeconds: total });
         }
-
         sendResponse({ days: result });
         break;
       }
 
       case 'CLEAR_ALL_DATA': {
-        const all = await chrome.storage.local.get(null);
+        const all     = await chrome.storage.local.get(null);
         const dayKeys = Object.keys(all).filter(k => k.startsWith('day_'));
         await chrome.storage.local.remove(dayKeys);
-
-        // Reset session
-        const state = await getCurrentState();
         await chrome.storage.session.set({
-          ...state,
-          isTracking: false,
-          hostname: null,
-          startTime: null,
-          lastHeartbeat: null,
+          hostname: null, startTime: null, lastHeartbeat: null,
+          isTracking: false, chromeFocused: true, userIdle: false,
         });
         sendResponse({ ok: true });
         break;
       }
 
       case 'CLEAR_SITE': {
-        const dayKey = `day_${getToday()}`;
-        const stored = await chrome.storage.local.get({ [dayKey]: {} });
-        if (stored[dayKey]) {
-          delete stored[dayKey][message.hostname];
-          await chrome.storage.local.set({ [dayKey]: stored[dayKey] });
+        const dateKey = `day_${getToday()}`;
+        const stored  = await chrome.storage.local.get({ [dateKey]: {} });
+        if (stored[dateKey] && message.hostname) {
+          delete stored[dateKey][message.hostname];
+          await chrome.storage.local.set({ [dateKey]: stored[dateKey] });
         }
         sendResponse({ ok: true });
         break;
@@ -667,5 +537,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ error: 'Unknown message type' });
     }
   })();
-  return true; // keep message channel open for async response
+  return true;
 });
+
+
