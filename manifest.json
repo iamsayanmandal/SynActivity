@@ -1,31 +1,26 @@
 {
   "manifest_version": 3,
   "name": "SynActivity",
-  "version": "1.2.0",
-  "description": "Tracks actual time spent on websites. 100% local — no cloud, no internet, no data leaks.",
-
+  "version": "1.3.0",
+  "description": "Tracks actual time spent on websites. 100% local \u2014 no cloud, no internet, no data leaks.",
   "permissions": [
     "tabs",
     "storage",
     "idle",
     "alarms"
   ],
-
   "background": {
     "service_worker": "background/service-worker.js"
   },
-
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "SynActivity"
   },
-
   "icons": {
-    "16":  "icons/icon-16.png",
-    "48":  "icons/icon-48.png",
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; connect-src 'none';"
   }
